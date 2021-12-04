@@ -3,8 +3,8 @@ import threading
 
 FORMAT = 'utf-8'
 HEADER = 64
-PORT = 5070
-SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5080
+SERVER = '127.0.0.1' #socket.gethostbyname(socket.gethostname())
 ADDRESS=(SERVER,PORT)
 DISSMSG = "break"
 
