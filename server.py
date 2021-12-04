@@ -14,14 +14,22 @@ server.bind(ADDRESS)
 def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
     connection = True
-    while connection!=None:
-        msg= conn.recv(HEADER).decode(FORMAT)
-        if msg:
-            if msg == DISSMSG: 
-                connection = False
-            print(addr,':',msg)
-            conn.sendall("received".encode(FORMAT))
-    conn.close()
+    
+    try:
+        while connection!=False:
+            msg= conn.recv(HEADER).decode(FORMAT)
+            if msg:
+                if msg == DISSMSG: 
+                    connection = False
+                print(addr,':',msg)
+                conn.sendall("received".encode(FORMAT))
+
+    except:         
+        print("client crashed")   
+        conn.close()
+
+    conn.close()    
+    return
 
 def start():
     server.listen()
@@ -36,4 +44,4 @@ def start():
 print("[STARTING]")
 #print(SERVER)
 start()
-print("END")
+
