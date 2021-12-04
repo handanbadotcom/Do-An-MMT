@@ -15,15 +15,12 @@ def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
     connection = True
     while connection!=None:
-        msg_length= conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            '''
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            '''
-            if msg_length == DISSMSG: 
+        msg= conn.recv(HEADER).decode(FORMAT)
+        if msg:
+            if msg == DISSMSG: 
                 connection = False
-            print(addr,':',msg_length)    
+            print(addr,':',msg)
+            conn.sendall("received".encode(FORMAT))
     conn.close()
 
 def start():
@@ -39,3 +36,4 @@ def start():
 print("[STARTING]")
 #print(SERVER)
 start()
+print("END")
