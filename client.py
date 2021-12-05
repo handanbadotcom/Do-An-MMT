@@ -12,11 +12,15 @@ client.connect(ADDRESS)
 def send_msg(msg):
     client.sendall(msg.encode(FORMAT))
 
+#muốn gửi gì cho server thì sử dụng hàm send_msg
+#vd nhắn tin cho server cho đến khi thoát bằng break
 message = ""
 while message!='break':
     message=input()
     send_msg(message)
     print(client.recv(HEADER).decode(FORMAT))
+
+    
 
 
 

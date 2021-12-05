@@ -14,7 +14,7 @@ server.bind(ADDRESS)
 def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
     connection = True
-    
+
     try:
         while connection!=False:
             msg= conn.recv(HEADER).decode(FORMAT)
@@ -23,7 +23,7 @@ def handle_client(conn, addr):
                     connection = False
                 print(addr,':',msg)
                 conn.sendall("received".encode(FORMAT))
-
+    #nếu client crash thì code nhảy vào except
     except:         
         print("client crashed")   
         conn.close()
@@ -31,6 +31,7 @@ def handle_client(conn, addr):
     conn.close()    
     return
 
+#khơỉ động server
 def start():
     server.listen()
     print("[LISTEN]", SERVER)
