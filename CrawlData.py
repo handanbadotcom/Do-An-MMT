@@ -37,9 +37,17 @@ Ten_NT=[]
 Mua=[]
 Ban=[]
 index=1
+
 for i in range(1,6):
     Title.append(Data[index])
     index += 1
+
+Title[0] = 'STT'
+Title[1] = 'Ngoai te'
+Title[2] = 'Ten ngoai te'
+Title[3] = 'Mua'
+Title[4] = 'Ban'
+
 for i in range(1,8):
     STT.append(Data[index])
     index += 1
@@ -55,8 +63,13 @@ for i in range(1,8):
 #chuyen thanh data frame
 Struct = {Title[0]:pandas.Series(STT),
           Title[1]:pandas.Series(NT),
-          Title[2]:pandas.Series(Ten_NT),
+   #       Title[2]:pandas.Series(Ten_NT),
           Title[3]:pandas.Series(Mua),
           Title[4]:pandas.Series(Ban),}
 DF = pandas.DataFrame(Struct)
 print(DF)
+JS = DF.to_json(orient='index')
+print(JS)
+
+with open("sample.json", "w") as outfile:
+    outfile.write(JS)
