@@ -41,7 +41,7 @@ index=1
 for i in range(1,6):
     Title.append(Data[index])
     index += 1
-
+#đổi lại tên cột thành ko dấu đễ dễ thực hiện
 Title[0] = 'STT'
 Title[1] = 'Ngoai te'
 Title[2] = 'Ten ngoai te'
@@ -63,13 +63,13 @@ for i in range(1,8):
 #chuyen thanh data frame
 Struct = {Title[0]:pandas.Series(STT),
           Title[1]:pandas.Series(NT),
-   #       Title[2]:pandas.Series(Ten_NT),
+   #       Title[2]:pandas.Series(Ten_NT), #có dấu bị lỗi
           Title[3]:pandas.Series(Mua),
           Title[4]:pandas.Series(Ban),}
 DF = pandas.DataFrame(Struct)
 print(DF)
-JS = DF.to_json(orient='index')
+JS = DF.to_json()
 print(JS)
 
-with open("sample.json", "w") as outfile:
+with open("Data.json", "w") as outfile:
     outfile.write(JS)
