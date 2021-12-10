@@ -1,8 +1,7 @@
 import json
+import pandas
 
-user = {
-    "username" : "cachabac",
-    "password" : "123456"
-}
+data = pandas.read_json('sample.json')
+print(data)
 
-json_object = json.dump(user)
+
