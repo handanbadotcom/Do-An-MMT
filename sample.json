@@ -1,1 +1,9 @@
-{"0":{"STT":"1","Ngoai te":"USD","Mua":"22.650","Ban":"23.150"},"1":{"STT":"2","Ngoai te":"EUR","Mua":"25.516","Ban":"27.095"},"2":{"STT":"3","Ngoai te":"JPY","Mua":"198","Ban":"210"},"3":{"STT":"4","Ngoai te":"GBP","Mua":"29.720","Ban":"31.559"},"4":{"STT":"5","Ngoai te":"CHF","Mua":"24.442","Ban":"25.954"},"5":{"STT":"6","Ngoai te":"AUD","Mua":"16.125","Ban":"17.122"},"6":{"STT":"7","Ngoai te":"CAD","Mua":"17.779","Ban":"18.879"}}
+{
+    "0":{"STT":"1","Ngoai te":"USD","Mua":"22.650","Ban":"23.150"},
+    "1":{"STT":"2","Ngoai te":"EUR","Mua":"25.516","Ban":"27.095"},
+    "2":{"STT":"3","Ngoai te":"JPY","Mua":"198","Ban":"210"},
+    "3":{"STT":"4","Ngoai te":"GBP","Mua":"29.720","Ban":"31.559"},
+    "4":{"STT":"5","Ngoai te":"CHF","Mua":"24.442","Ban":"25.954"},
+    "5":{"STT":"6","Ngoai te":"AUD","Mua":"16.125","Ban":"17.122"},
+    "6":{"STT":"7","Ngoai te":"CAD","Mua":"17.779","Ban":"18.879"}
+}
