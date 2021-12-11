@@ -4,16 +4,18 @@ import pandas
 import requests
 from bs4 import *
 from datetime import date
+import json
 
 FORMAT = 'utf8' 
-HEADER = 64 #chiều dài gói tin
-PORT = 5080
+HEADER = 2048 #chiều dài gói tin
+PORT = 5090
 SERVER = '127.0.0.1' #socket.gethostbyname(socket.gethostname())
 ADDRESS=(SERVER,PORT)
 DISSMSG = "break"
 #khởi tạo socket
 server=socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.bind(ADDRESS)
+URL='https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 
 #gọi hàm này khi có client kết nối
 def handle_client(conn, addr):
@@ -26,8 +28,12 @@ def handle_client(conn, addr):
             if msg:
                 if msg == DISSMSG: 
                     connection = False
+                if msg =="request data":
+                    conn.sendall(data_out.encode(FORMAT))
+                    print("Data sent")
                 print(addr,':',msg)
-                conn.sendall("received".encode(FORMAT))
+               # conn.sendall("received".encode(FORMAT))
+
     #nếu client crash thì code nhảy vào except
     except:         
         print("client crashed")   
@@ -46,10 +52,14 @@ def start():
         thread.start()
         print("[ACTIVE CONNECTION]", {threading.active_count()})
 
-def readData():
-    data = pandas.read_json('Data.json') #đọc vào file json
+def readData( fileName):
+    data = pandas.read_json(fileName) #đọc vào file json
+    #data = json.load(open("Data.json"))
+    '''
     find= 'USD' #tên ngoại tệ
     f =data[data['Ngoai te'].str.contains(find)] # xuất ra thông tin ngoại tệ
+    '''
+    return data
 
 def crawlData(url):
     #tao ket noi va tao soup
@@ -117,7 +127,18 @@ def crawlData(url):
     DF = pandas.DataFrame(Struct)
     return DF
     
+def writeToJson(frame, fileName):
+    JS = frame.to_json()
+   # print(JS)
+   #  time = date.today()
+   # filename = time.strftime("%d_%m_%Y")+".json"
+    with open(fileName, "w") as outfile:
+        outfile.write(JS)
+
+
 print("[STARTING]")
+data= crawlData(URL)
+data_out=data.to_json() #data.to_json(): chuyển frame về dạng JSON, json.dumps: chuyển json thành string
 #print(SERVER)
-#start()
+start()
 

@@ -1,5 +1,5 @@
 import requests
-import lxml
+import json
 import pandas
 from bs4 import *
 from datetime import date
@@ -73,7 +73,6 @@ DF = pandas.DataFrame(Struct)
 print(DF)
 JS = DF.to_json()
 print(JS)
-
 time = date.today()
 filename = time.strftime("%d_%m_%Y")+".json"
 with open(filename, "w") as outfile:
