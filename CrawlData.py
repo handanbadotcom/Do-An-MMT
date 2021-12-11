@@ -2,6 +2,7 @@ import requests
 import lxml
 import pandas
 from bs4 import *
+from datetime import date
 
 #link web
 url= 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
@@ -66,10 +67,14 @@ Struct = {Title[0]:pandas.Series(STT),
    #       Title[2]:pandas.Series(Ten_NT), #có dấu bị lỗi
           Title[3]:pandas.Series(Mua),
           Title[4]:pandas.Series(Ban),}
+
+
 DF = pandas.DataFrame(Struct)
 print(DF)
 JS = DF.to_json()
 print(JS)
 
-with open("Data.json", "w") as outfile:
+time = date.today()
+filename = time.strftime("%d_%m_%Y")+".json"
+with open(filename, "w") as outfile:
     outfile.write(JS)
