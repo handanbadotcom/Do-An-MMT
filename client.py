@@ -14,19 +14,22 @@ client.connect(ADDRESS)
 def send_msg(msg):
     client.sendall(msg.encode(FORMAT))
 
-def searchCurrency( data, currency):
-    f =data[data['Ngoai te'].str.contains(currency)] # xuất ra thông tin ngoại tệ
-    return(f)
+def searchCurrency( data, currency): #hàm tra cứu
+   f=data[data['Ngoai te'].str.contains(currency)] # tìm trong dataframe cột 'Ngoai te' có chuỗi nào chứa chuỗi con currency ko
+   return(f)
+    
 
 #muốn gửi gì cho server thì sử dụng hàm send_msg
-#vd nhắn tin cho server cho đến khi thoát bằng break
+#vd nhắn tin cho server cho đến khi thoát bằng break hoặc yêu cầu data bằng cách gõ request data
 message = ""
 while message!='break':
     message=input()
     send_msg(message)
     if message == 'request data':
-     data = client.recv(HEADER).decode(FORMAT)
-     output= json.loads(data)
+     data = client.recv(HEADER).decode(FORMAT) #client nhận string 
+     output = pandas.read_json(data) #load string vừa nhận được thành dataframe
+     currency=searchCurrency(output,'USD')
+     print(currency)
     print(client.recv(HEADER).decode(FORMAT))
 
     

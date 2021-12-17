@@ -71,6 +71,7 @@ Struct = {Title[0]:pandas.Series(STT),
 
 DF = pandas.DataFrame(Struct)
 print(DF)
+
 JS = DF.to_json()
 print(JS)
 time = date.today()

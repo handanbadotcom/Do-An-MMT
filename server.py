@@ -21,15 +21,14 @@ URL='https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&
 def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
     connection = True
-
     try:
         while connection!=False:
             msg= conn.recv(HEADER).decode(FORMAT)
             if msg:
                 if msg == DISSMSG: 
                     connection = False
-                if msg =="request data":
-                    conn.sendall(data_out.encode(FORMAT))
+                if msg =="request data": #client yêu cầu data
+                    conn.sendall(data_out.encode(FORMAT)) #gửi data cho client
                     print("Data sent")
                 print(addr,':',msg)
                # conn.sendall("received".encode(FORMAT))
@@ -54,11 +53,6 @@ def start():
 
 def readData( fileName):
     data = pandas.read_json(fileName) #đọc vào file json
-    #data = json.load(open("Data.json"))
-    '''
-    find= 'USD' #tên ngoại tệ
-    f =data[data['Ngoai te'].str.contains(find)] # xuất ra thông tin ngoại tệ
-    '''
     return data
 
 def crawlData(url):
@@ -129,16 +123,15 @@ def crawlData(url):
     
 def writeToJson(frame, fileName):
     JS = frame.to_json()
-   # print(JS)
-   #  time = date.today()
-   # filename = time.strftime("%d_%m_%Y")+".json"
     with open(fileName, "w") as outfile:
         outfile.write(JS)
 
 
 print("[STARTING]")
-data= crawlData(URL)
-data_out=data.to_json() #data.to_json(): chuyển frame về dạng JSON, json.dumps: chuyển json thành string
-#print(SERVER)
+time = date.today() #biến time lưu ngày tháng năm theo thời gian thực
+filename = time.strftime("%d_%m_%Y")+".json" # strftime chuyển biến time dưới dạng string kiểu ngày_tháng_năm
+data= crawlData(URL) #hàm crawl sẽ trả về kiểu dữ liệu dataframe dưới tên biến là data
+writeToJson(data,filename) #lưu dataframe(data) dưới kiểu JSON với tên là filename
+data_out=data.to_json() #data.to_json(): chuyển dataframe(data) về cấu trúc JSON 
 start()
 
