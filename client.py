@@ -18,7 +18,7 @@ def searchCurrency( data, currency): #hàm tra cứu
    f=data[data['Ngoai te'].str.contains(currency)] # tìm trong dataframe cột 'Ngoai te' có chuỗi nào chứa chuỗi con currency ko
    print(f)
     
-def requestData():
+def requestData(): #gửi yêu cầu data và nhận về json string, đỗi thành dataframe và trả về
      data = client.recv(HEADER).decode(FORMAT) #client nhận string 
      output = pandas.read_json(data) #load string vừa nhận được thành dataframe
      return output

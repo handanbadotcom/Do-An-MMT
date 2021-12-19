@@ -8,7 +8,6 @@ import lxml
 import pandas as pd
 from datetime import datetime
 from bs4 import BeautifulSoup
-from selenium import webdriver
 import time
 import re
 import os
