@@ -16,21 +16,39 @@ def send_msg(msg):
 
 def searchCurrency( data, currency): #hàm tra cứu
    f=data[data['Ngoai te'].str.contains(currency)] # tìm trong dataframe cột 'Ngoai te' có chuỗi nào chứa chuỗi con currency ko
-   return(f)
+   print(f)
     
+def requestData():
+     data = client.recv(HEADER).decode(FORMAT) #client nhận string 
+     output = pandas.read_json(data) #load string vừa nhận được thành dataframe
+     return output
 
 #muốn gửi gì cho server thì sử dụng hàm send_msg
 #vd nhắn tin cho server cho đến khi thoát bằng break hoặc yêu cầu data bằng cách gõ request data
 message = ""
-while message!='break':
-    message=input()
-    send_msg(message)
-    if message == 'request data':
-     data = client.recv(HEADER).decode(FORMAT) #client nhận string 
-     output = pandas.read_json(data) #load string vừa nhận được thành dataframe
-     currency=searchCurrency(output,'USD')
-     print(currency)
-    print(client.recv(HEADER).decode(FORMAT))
+try:
+    while (1):
+        message=input()
+        if message == 'request data':
+            send_msg(message)
+            data=requestData()
+            print(data)
+        if message == 'break':
+            send_msg(message)
+            client.close
+            break
+        if message == 'tra cuu':
+            print('Ngoai te: ')
+            currency=input()
+            searchCurrency(data,currency)
+        else:
+            send_msg(message)
+            data=requestData()
+            print(data)
+except:
+    print('crashed')
+
+
 
     
 

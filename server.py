@@ -6,11 +6,10 @@ from bs4 import *
 from datetime import date
 import json
 
-from client import send_msg
 
 FORMAT = 'utf8' 
 HEADER = 2048 #chiều dài gói tin
-PORT = 5069
+PORT = 5090
 SERVER = '127.0.0.1' #socket.gethostbyname(socket.gethostname())
 ADDRESS=(SERVER,PORT)
 DISSMSG = "break"
@@ -25,24 +24,21 @@ URL='https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&
 def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
     connection = True
+
     try:
         while connection!=False:
             msg= conn.recv(HEADER).decode(FORMAT)
-            if msg: #client sẽ gửi các lệnh cho server, server tùy lệnh mà thực hiện các chức năng
-                if msg == DISSMSG: #client yêu cầu thoát
-                    print('client ',addr,' disconnected')
-                    connection = False 
-                    
-                if msg =="request data": #client yêu cầu data cho hôm nay
-                    conn.sendall(data_out.encode(FORMAT)) #gửi data cho client
-                    print("Data sent") #cho biết data đã gửi đi
-                   
+            if msg:
+                if msg == DISSMSG: 
+                    connection = False
+                if msg =="request data":
+                    conn.sendall(data_out.encode(FORMAT))
+                    print("Data sent")
                 else:
-                    data=readData(msg+".json")   
-                    data=data.to_json()
-                    conn.sendall(data.encode(FORMAT))
-                print(addr,':',msg) #in ra yêu cầu của client
-
+                    today=readData(msg)
+                    data_date=today.to_json
+                    conn.sendall(data_date.encode(FORMAT))   
+                    
     #nếu client crash thì code nhảy vào except
     except:         
         print("client crashed")   
@@ -132,6 +128,9 @@ def crawlData(url):
     
 def writeToJson(frame, fileName):
     JS = frame.to_json()
+   # print(JS)
+   #  time = date.today()
+   # filename = time.strftime("%d_%m_%Y")+".json"
     with open(fileName, "w") as outfile:
         outfile.write(JS)
 
