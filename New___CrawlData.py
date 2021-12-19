@@ -14,7 +14,7 @@ def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so n
     chutmp = []
     STT = [1,2,3,4,5,6,7]
     NT = ['USD', 'EUR', 'JPY', 'GBP', 'CHF', 'AUD', 'CAD']
-    TenNT = ['Đô la Mỹ','Đồng Euro','Yên Nhật', 'Bảng Anh', 'Phơ răng Thuỵ Sĩ', 'Đô la Úc', 'Đô la Canada']
+    TenNT = ['Do la My','Dong Euro','Yen Nhat', 'Bang Anh', 'Pho rang Thuy Si', 'Do la Uc', 'Do la Canada']
     for i in range(0, 7*NumOfDay):
         sotmp.append(0)
         chutmp.append('a')
