@@ -6,9 +6,11 @@ from bs4 import *
 from datetime import date
 import json
 
+from client import send_msg
+
 FORMAT = 'utf8' 
 HEADER = 2048 #chiều dài gói tin
-PORT = 5090
+PORT = 5069
 SERVER = '127.0.0.1' #socket.gethostbyname(socket.gethostname())
 ADDRESS=(SERVER,PORT)
 DISSMSG = "break"
@@ -17,6 +19,8 @@ server=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDRESS)
 URL='https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 
+
+
 #gọi hàm này khi có client kết nối
 def handle_client(conn, addr):
     print("[NEW CONNECTION]", {addr})
@@ -24,20 +28,25 @@ def handle_client(conn, addr):
     try:
         while connection!=False:
             msg= conn.recv(HEADER).decode(FORMAT)
-            if msg:
-                if msg == DISSMSG: 
-                    connection = False
-                if msg =="request data": #client yêu cầu data
+            if msg: #client sẽ gửi các lệnh cho server, server tùy lệnh mà thực hiện các chức năng
+                if msg == DISSMSG: #client yêu cầu thoát
+                    print('client ',addr,' disconnected')
+                    connection = False 
+                    
+                if msg =="request data": #client yêu cầu data cho hôm nay
                     conn.sendall(data_out.encode(FORMAT)) #gửi data cho client
-                    print("Data sent")
-                print(addr,':',msg)
-               # conn.sendall("received".encode(FORMAT))
+                    print("Data sent") #cho biết data đã gửi đi
+                   
+                else:
+                    data=readData(msg+".json")   
+                    data=data.to_json()
+                    conn.sendall(data.encode(FORMAT))
+                print(addr,':',msg) #in ra yêu cầu của client
 
     #nếu client crash thì code nhảy vào except
     except:         
         print("client crashed")   
         conn.close()
-
     conn.close()    
     return
 
@@ -132,6 +141,6 @@ time = date.today() #biến time lưu ngày tháng năm theo thời gian thực
 filename = time.strftime("%d_%m_%Y")+".json" # strftime chuyển biến time dưới dạng string kiểu ngày_tháng_năm
 data= crawlData(URL) #hàm crawl sẽ trả về kiểu dữ liệu dataframe dưới tên biến là data
 writeToJson(data,filename) #lưu dataframe(data) dưới kiểu JSON với tên là filename
-data_out=data.to_json() #data.to_json(): chuyển dataframe(data) về cấu trúc JSON 
+data_out=data.to_json() #data.to_json(): chuyển dataframe (data) về cấu trúc JSON 
 start()
 

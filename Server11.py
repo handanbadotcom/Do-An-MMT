@@ -4,7 +4,7 @@ import threading
 import json
 
 HOSTNAME = socket.gethostname()
-HOST = socket.gethostbyname(HOSTNAME)
+HOST = '127.0.0.1'#socket.gethostbyname(HOSTNAME)
 PORT = 65432
 FORMAT = "utf8"
 
