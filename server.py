@@ -28,6 +28,7 @@ def handle_client(conn, addr):
     try:
         while connection!=False:
             msg= conn.recv(HEADER).decode(FORMAT)
+            print(addr,' : ' ,msg)
             if msg:
                 if msg == DISSMSG: 
                     connection = False
@@ -35,8 +36,8 @@ def handle_client(conn, addr):
                     conn.sendall(data_out.encode(FORMAT))
                     print("Data sent")
                 else:
-                    today=readData(msg)
-                    data_date=today.to_json
+                    date=readData(msg+'.json')
+                    data_date=date.to_json()
                     conn.sendall(data_date.encode(FORMAT))   
                     
     #nếu client crash thì code nhảy vào except
