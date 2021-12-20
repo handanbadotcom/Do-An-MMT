@@ -2,21 +2,104 @@ import tkinter as Tk
 import socket
 import threading
 import json
-
 import requests
-import lxml
-import pandas as pd
+import pandas 
 from datetime import datetime
 from bs4 import BeautifulSoup
-import time
-import re
-import os
+from datetime import *
+import datetime
+
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
 PORT = 65432
 FORMAT = "utf8"
+NUM_OF_DAY = 3 #so ngay toi da cua file json
+#link web
+url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 
+def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so ngay cho truoc
+    sotmp = []
+    chutmp = []
+    STT = [1,2,3,4,5,6,7]
+    NT = ['USD', 'EUR', 'JPY', 'GBP', 'CHF', 'AUD', 'CAD']
+    TenNT = ['Do la My','Dong Euro','Yen Nhat', 'Bang Anh', 'Pho rang Thuy Si', 'Do la Uc', 'Do la Canada']
+    for i in range(0, 7*NumOfDay):
+        sotmp.append(0)
+        chutmp.append('a')
+    Struct = {'Ngày'         : pandas.Series(chutmp),
+              'STT'          : pandas.Series(STT * NumOfDay),
+              'Ngoại tệ'     : pandas.Series(NT * NumOfDay),
+              'Tên Ngoại tệ' : pandas.Series(TenNT * NumOfDay),
+              'Mua'          : pandas.Series(sotmp),
+              'Bán'          : pandas.Series(sotmp),}
+    DF = pandas.DataFrame(Struct)
+    with open(tenFile, 'w+') as file:
+        DF.to_json(file, orient='index')
+def updateFile(fileName, NumOfDay, Ban, Mua):
+    with open(fileName) as json_file:
+        data = pandas.read_json(json_file, orient='index')
+    now = datetime.datetime.now()
+    today=now.strftime("%m/%d/%Y")
+    if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
+        #push up data for new day
+        for i in range(0, 7 * (NumOfDay - 1)):
+            for j in range(0, 6):
+                data.iat[i, j] = data.iat[i + 7, j]
+        #replace data of column day
+        for i in range(-7, 0):
+            data.iat[i, 0] = today
+    for i in range(-7, 0):
+        data.iat[i,4] = Mua[i]
+        data.iat[i,5] = Ban[i]
+    #print(data)
+    with open(fileName, 'w+') as file:
+        data.to_json(file, orient='index')
+def updateData(url, fileName, NumOfDay):
+    #tao ket noi va tao soup
+    r = requests.get(url).content
+    soup = BeautifulSoup(r,'lxml')
+
+    #chon bang can trich du lieu
+    allTables = soup.find_all('table', class_='jrPage')
+    table = allTables[1]
+
+    #lay data can thiet
+    rawData = []
+    for td in table.find_all('td'):
+        if td.text != '' and td.text != ' ':
+            rawData.append(td.text)
+
+    Data = []
+    for data in rawData:
+        a = data.replace(data[0]+data[1], data[1])
+        Data.append(a)
+
+    Title = []  #ten truong
+    STT = []    #so thu tu  
+    NT = []     #ma ngoai te (USD,EUR,...)    
+    Ten_NT = [] #ten ngoai te
+    Mua = []    #Gia mua
+    Ban = []    #Gia ban
+    index = 1
+
+    #tach data thanh cac truong du lieu khac nhau
+    for i in range(1,6):
+        Title.append(Data[index])
+        index += 1
+    for i in range(1,8):
+        STT.append(Data[index])
+        index += 1
+        NT.append(Data[index])
+        index += 1
+        Ten_NT.append(Data[index])
+        index += 1
+        Mua.append(Data[index])
+        index += 1
+        Ban.append(Data[index])
+        index += 1
+    #Ghi du lieu da moi vao file
+    updateFile(fileName, NumOfDay, Ban, Mua)
 class App(Tk.Tk):
     def __init__(self):
         Tk.Tk.__init__(self)
@@ -95,70 +178,6 @@ class App(Tk.Tk):
             clientStatus.append(tmp)
             return username
 
-        def handleClientLookUp(connection, nClient, clientStatus, usingAccount):
-            url = 'https://vi.wikipedia.org/wiki/B%E1%BA%A3n_m%E1%BA%ABu:D%E1%BB%AF_li%E1%BB%87u_%C4%91%E1%BA%A1i_d%E1%BB%8Bch_COVID-19_t%E1%BA%A1i_Vi%E1%BB%87t_Nam'
-            driver = webdriver.Chrome()
-            driver.get(url)
-
-            # tạo soup, tìm bảng
-            time.sleep(5)
-            soup = BeautifulSoup(driver.page_source, 'lxml')
-            tables = soup.find(
-                'table', class_='wikitable plainrowheaders sortable tpl-blanktable jquery-tablesorter')
-
-            # hàm chuyển string thành số
-            def process_num(num):
-                return float(re.sub(r'[^\w\s.]', '', num))
-
-            # lập cột
-            provinces = []
-            cases = []
-            deaths = []
-            # tìm data
-            for row in tables.findAll('tr'):
-                cells = row.find_all('td')
-                if len(cells) > 1:
-                    province = cells[0]
-                    provinces.append(province.text.strip())  # lấy cột tỉnh
-
-                    case = cells[1]
-                    cases.append(process_num(case.text.strip()))  # cột ca nhiễm
-
-                    death = cells[2]
-                    deaths.append(process_num(death.text.strip()))  # cột người chết
-
-            # lập list để tạo dataframe
-            data = {'Tỉnh': provinces, 'Số ca nhiễm': cases, 'Tử vong': deaths}
-
-            # lập data frame
-            df1 = pd.DataFrame(data)
-            pd.set_option('display.max_rows', 1000)
-
-            # tìm kiếm
-            name = connection.recv(1024).decode(FORMAT)
-            try:
-                df2 = df1.loc[df1['Tỉnh'] == name]
-                df2 = df2.reset_index()
-
-                province = df2.at[0, 'Tỉnh']  # Gán tên tỉnh cần tìm vào biến mới
-                cases = df2.at[0, 'Số ca nhiễm']  # Gán biến ca nhiễm
-                deaths = df2.at[0, 'Tử vong']  # Gán số liệu tử vong vào biến mới
-                cases = str(cases)[0:len(str(cases)) - 2]
-                deaths = str(cases)[0:len(str(cases)) - 2]
-
-
-                connection.sendall('True'.encode(FORMAT))
-                connection.recv(1024).decode(FORMAT)
-
-                connection.sendall(cases.encode(FORMAT))
-                connection.recv(1024).decode(FORMAT)
-                connection.sendall(deaths.encode(FORMAT))
-                
-                tmp = "Client " + str(nClient) + " has searched for cases and deaths of: " + name
-                clientStatus.append(tmp)
-            except:
-                connection.sendall('False'.encode(FORMAT))
-
         def handleClient(self, connection, address, nClient, onlineClient, clientStatus):
             self.waitingLabel['text'] = ''
             tmp = "Connected by Client " + str(nClient) + ": " +  str(address)
@@ -178,7 +197,8 @@ class App(Tk.Tk):
                         tmp = usingAccount + " has logged out"
                         clientStatus.append(tmp)
 
-                    elif message == "Look up": handleClientLookUp(connection, nClient, clientStatus, usingAccount)
+                    elif message == "Look up": 
+                        connection.sendall(data_send.encode(FORMAT))
 
                     elif message == "Exit":
                         tmp = "Client " + str(nClient) + " has disconnected."
@@ -220,6 +240,11 @@ class App(Tk.Tk):
         serverThread.daemon = False
         serverThread.start()
 
+#initJsonFile('test.json',NUM_OF_DAY)
+updateData(url, 'test.json', NUM_OF_DAY)
+with open('test.json') as json_file:
+        data = pandas.read_json(json_file, orient='index')
+data_send=data.to_json()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
