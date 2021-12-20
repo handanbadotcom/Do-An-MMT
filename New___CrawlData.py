@@ -92,7 +92,7 @@ def updateData(url, fileName, NumOfDay):
         index += 1
     #Ghi du lieu da moi vao file
     updateFile(fileName, NumOfDay, Ban, Mua)
-initJsonFile('test.json',NUM_OF_DAY)
+#initJsonFile('test.json',NUM_OF_DAY)
 updateData(url, 'test.json', NUM_OF_DAY)
 with open('test.json') as json_file:
         data = pandas.read_json(json_file, orient='index')
