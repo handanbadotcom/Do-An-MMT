@@ -1,10 +1,37 @@
 import tkinter as Tk
 from tkinter import messagebox
 import socket
-
+import pandas
 HOST = ""
 PORT = 65432
 FORMAT = "utf8"
+
+def search_currency(data, find):
+    f=''
+    for i in data:
+        if data[i]["Ngo\u1ea1i t\u1ec7"]==find:  
+          f=f+data[i].map(str)
+          break
+    return(f)
+
+def search_date(data, date):
+    f=''
+    for i in data:
+        if data[i]["Ng\u00e0y"]==date:
+            f=f+data[i].map(str) 
+    return(f)
+def search(data, currency=None, date=None):  
+    f=''
+    if date==None:
+      return ( search_currency(data,currency))
+    if currency==None:
+        return(search_date(data,date))
+    else:    
+        for i in data:
+            if (data[i]["Ngo\u1ea1i t\u1ec7"]==currency) and (data[i]["Ng\u00e0y"]==date):
+               f=f+data[i].map(str)  
+              
+    return(f)
 
 class ConnectPage(Tk.Frame):
     def __init__(self, parent, appControl):
@@ -78,10 +105,16 @@ class HomePage(Tk.Frame):
 
         titleLabel = Tk.Label(self, text = 'HOME PAGE').pack()
         provinceLabel = Tk.Label(self, text = 'Province').pack()
-        provinceEntry = Tk.Entry(self).pack()
-        infoLabel = Tk.Label(self, text = '').pack()
+        self.provinceEntry = Tk.Entry(self)
+        self.provinceEntry.pack()
+        dateLabel = Tk.Label(self, text = 'Date').pack()
+        self.dateEntry = Tk.Entry(self)
+        self.dateEntry.pack()
+        self.infoLabel = Tk.Label(self, text = '')
+        self.infoLabel.pack()
         lookUpButton = Tk.Button(self, text = 'Look up', command=lambda: appControl.lookUp(self, client)).pack()
         logoutButton = Tk.Button(self, text = 'Logout', command=lambda: appControl.Logout()).pack()
+
 
 class App(Tk.Tk):
     def __init__(self):
@@ -204,20 +237,12 @@ class App(Tk.Tk):
     def lookUp(self, currentPage, client):
         try:
             client.sendall('Look up'.encode(FORMAT))
+            date = currentPage.dateEntry.get()
             province = currentPage.provinceEntry.get()
-            print("You tried to look up cases and deaths of", province)
-            client.sendall(province.encode(FORMAT))
-
-            response = client.recv(1024).decode(FORMAT)
-
-            if response == 'True':
-                cases = int(client.recv(1024).decode(FORMAT))
-                client.sendall(cases.encode(FORMAT))
-                deaths = int(client.recv(1024).decode(FORMAT))
-
-                currentPage.infoLabel['text'] = 'Cases: ' + str(cases) + ' - Deaths: ' + str(deaths)
-            else:
-                currentPage.infoLabel['text'] = 'Invalid Province!'
+            response = client.recv(2048).decode(FORMAT)
+            response = pandas.read_json(response, orient='index')
+            print(response)
+            currentPage.infoLabel['text'] = search(response,province,date)
         except:
             self.Error()
 
