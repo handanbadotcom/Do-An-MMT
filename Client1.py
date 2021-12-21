@@ -4,7 +4,7 @@ import socket
 import pandas
 import tkinter.scrolledtext as st
 HOST = ""
-PORT = 65432
+PORT = 60090
 FORMAT = "utf8"
 
 def search_currency(data, find):
@@ -30,7 +30,8 @@ def search(data, currency=None, date=None):
     else:    
         for i in data:
             if (data[i]["Ngo\u1ea1i t\u1ec7"]==currency) and (data[i]["Ng\u00e0y"]==date):
-               f=f+data[i].map(str) # print(data[i])
+                f=f+str(data[i].map(str)) #print(data[i])
+                f=f+ '\n'
     return(f)
 
 class ConnectPage(Tk.Frame):
@@ -245,7 +246,10 @@ class App(Tk.Tk):
             response = pandas.read_json(response, orient='index')
             print(response)
             #currentPage.infoLabel['text'] = search(response,currency,date)
+            currentPage.text_area.configure(state='normal')
+            currentPage.text_area.delete('1.0', Tk.END)
             currentPage.text_area.insert(Tk.INSERT,search(response,currency,date))
+            currentPage.text_area.configure(state='disabled')
         except:
             self.Error()
 

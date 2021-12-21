@@ -12,7 +12,7 @@ import datetime
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
-PORT = 65432
+PORT = 60090
 FORMAT = "utf8"
 NUM_OF_DAY = 3 #so ngay toi da cua file json
 #link web
