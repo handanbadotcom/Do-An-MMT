@@ -2,6 +2,7 @@ import tkinter as Tk
 from tkinter import messagebox
 import socket
 import pandas
+import tkinter.scrolledtext as st
 HOST = ""
 PORT = 65432
 FORMAT = "utf8"
@@ -111,6 +112,8 @@ class HomePage(Tk.Frame):
         self.dateEntry.pack()
         self.infoLabel = Tk.Label(self, text = '')
         self.infoLabel.pack()
+        self.text_area = st.ScrolledText(self,width = 30, height = 7)
+        self.text_area.pack()
         lookUpButton = Tk.Button(self, text = 'Look up', command=lambda: appControl.lookUp(self, client)).pack()
         logoutButton = Tk.Button(self, text = 'Logout', command=lambda: appControl.Logout()).pack()
 
@@ -241,7 +244,8 @@ class App(Tk.Tk):
             response = client.recv(2048).decode(FORMAT)
             response = pandas.read_json(response, orient='index')
             print(response)
-            currentPage.infoLabel['text'] = search(response,currency,date)
+            #currentPage.infoLabel['text'] = search(response,currency,date)
+            currentPage.text_area.insert(Tk.INSERT,search(response,currency,date))
         except:
             self.Error()
 
