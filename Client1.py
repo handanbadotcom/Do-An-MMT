@@ -13,6 +13,8 @@ def search_currency(data, find):
         if data[i]["Ngo\u1ea1i t\u1ec7"]==find:  
           f=f+str(data[i].map(str))
           f=f+'\n'
+          tmp = 'Name: ' + str(i) + ', dtype: object'
+          f = f.replace(tmp,'')
     return(f)
 def search_date(data, date):
     f=''
@@ -20,11 +22,13 @@ def search_date(data, date):
         if data[i]["Ng\u00e0y"]==date:
             f=f+str(data[i].map(str)) #print(data[i])
             f=f+ '\n'
+            tmp = 'Name: ' + str(i) + ', dtype: object'
+            f = f.replace(tmp,'')
     return(f)
 def search(data, currency=None, date=None):
     f=''
     if date=='':
-      return ( search_currency(data,currency))
+      return( search_currency(data,currency))
     if currency=='':
         return(search_date(data,date))
     else:    
@@ -32,6 +36,8 @@ def search(data, currency=None, date=None):
             if (data[i]["Ngo\u1ea1i t\u1ec7"]==currency) and (data[i]["Ng\u00e0y"]==date):
                 f=f+str(data[i].map(str)) #print(data[i])
                 f=f+ '\n'
+                tmp = 'Name: ' + str(i) + ', dtype: object'
+                f = f.replace(tmp,'')
     return(f)
 
 class ConnectPage(Tk.Frame):

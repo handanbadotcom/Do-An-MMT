@@ -8,17 +8,23 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from datetime import *
 import datetime
-
+import time
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
 PORT = 60090
 FORMAT = "utf8"
-NUM_OF_DAY = 3 #so ngay toi da cua file json
-#link web
-url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
+NUM_OF_DAY = 3 
 
-def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so ngay cho truoc
+Limit = 1      #phut
+url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
+fileName='Currency.json'
+
+def openFile(Filename):
+    with open(Filename) as json_file:
+        data = pandas.read_json(json_file, orient='index')
+    return data    
+def initJsonFile(tenFile, NumOfDay): 
     sotmp = []
     chutmp = []
     STT = [1,2,3,4,5,6,7]
@@ -37,24 +43,28 @@ def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so n
     with open(tenFile, 'w+') as file:
         DF.to_json(file, orient='index')
 def updateFile(fileName, NumOfDay, Ban, Mua):
-    with open(fileName) as json_file:
-        data = pandas.read_json(json_file, orient='index')
-    now = datetime.datetime.now()
-    today=now.strftime("%d/%m/%Y")
-    if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
-        #push up data for new day
-        for i in range(0, 7 * (NumOfDay - 1)):
-            for j in range(0, 6):
-                data.iat[i, j] = data.iat[i + 7, j]
-        #replace data of column day
+    try:
+        with open(fileName) as json_file:
+            data = pandas.read_json(json_file, orient='index')
+        now = datetime.datetime.now()
+        today=now.strftime("%d/%m/%Y")
+        if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
+            #push up data for new day
+            for i in range(0, 7 * (NumOfDay - 1)):
+                for j in range(0, 6):
+                    data.iat[i, j] = data.iat[i + 7, j]
+            #replace data of column day
+            for i in range(-7, 0):
+                data.iat[i, 0] = today
         for i in range(-7, 0):
-            data.iat[i, 0] = today
-    for i in range(-7, 0):
-        data.iat[i,4] = Mua[i]
-        data.iat[i,5] = Ban[i]
-    #print(data)
-    with open(fileName, 'w+') as file:
-        data.to_json(file, orient='index')
+            data.iat[i,4] = Mua[i]
+            data.iat[i,5] = Ban[i]
+        #print(data)
+        with open(fileName, 'w+') as file:
+            data.to_json(file, orient='index')
+    except:
+        initJsonFile(fileName,NumOfDay)
+        updateData(url,fileName,NumOfDay)
 def updateData(url, fileName, NumOfDay):
     #tao ket noi va tao soup
     r = requests.get(url).content
@@ -201,8 +211,8 @@ class App(Tk.Tk):
                         connection.sendall(data_send.encode(FORMAT))
 
                     elif message == "Exit":
-                        tmp = "Client " + str(nClient) + " has disconnected."
-                        onlineClient.remove(usingAccount)
+                        tmp = "Client " + str(nClient) + " has disconnected."                           
+                        if usingAccount in onlineClient: onlineClient.remove(usingAccount)
                         clientStatus.append(tmp)
                         updateClientStatus(clientStatus)
                         connection.close()
@@ -210,7 +220,7 @@ class App(Tk.Tk):
 
                 except:
                     tmp = "Client " + str(nClient) + " might be forcibly disconnected!"
-                    onlineClient.remove(usingAccount)
+                    if usingAccount in onlineClient: onlineClient.remove(usingAccount)
                     clientStatus.append(tmp)
                     updateClientStatus(clientStatus)
                     connection.close()
@@ -240,14 +250,22 @@ class App(Tk.Tk):
         serverThread.daemon = False
         serverThread.start()
 
-#initJsonFile('test.json',NUM_OF_DAY)
-updateData(url, 'test.json', NUM_OF_DAY)
-with open('test.json') as json_file:
-        data = pandas.read_json(json_file, orient='index')
-data_send=data.to_json()
+
+updateData(url, fileName, NUM_OF_DAY)
+data_send=openFile(fileName).to_json()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
+
+def timeCounter():
+    global data_send
+    while True:
+        time.sleep(60 * Limit)
+        updateData(url, fileName, NUM_OF_DAY)
+        data_send=openFile(fileName).to_json()
+        
+t = threading.Thread(target = timeCounter)
+t.start()
 
 try:
     app = App()
