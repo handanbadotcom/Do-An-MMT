@@ -250,8 +250,6 @@ class App(Tk.Tk):
             currency = currentPage.currencyEntry.get()
             response = client.recv(2048).decode(FORMAT)
             response = pandas.read_json(response, orient='index')
-            print(response)
-            #currentPage.infoLabel['text'] = search(response,currency,date)
             currentPage.text_area.configure(state='normal')
             currentPage.text_area.delete('1.0', Tk.END)
             currentPage.text_area.insert(Tk.INSERT,search(response,currency,date))

@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from datetime import *
 import datetime
 import time
+import tkinter.scrolledtext as st
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
@@ -19,7 +20,53 @@ NUM_OF_DAY = 3
 Limit = 1      #phut
 url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 fileName='Currency.json'
+account_fileName='account.json'
 
+def addAccount(fileName, ID, pw):
+    with open(fileName) as json_file:
+        DF = pandas.read_json(json_file, orient='index')
+    n = int(DF.size /2)
+    struct = {'ID':pandas.Series(ID,index = [n]),
+          'pass':pandas.Series(pw,index= [n])}
+    newDF = pandas.DataFrame(struct)
+    DF = pandas.concat([DF, newDF], axis=0, join='inner')
+    with open(fileName, 'w+') as file:
+        DF.to_json(file, orient='index')
+def pw_check(pw):
+      
+    SpecialSym =['!', '@', '#', '$', '%', '^', '&', '*']
+    val = True
+    level = 0  
+    if len(pw) < 6:
+        print('length should be at least 6')
+        return False
+          
+    if len(pw) > 20:
+        print('length should be not be greater than 20')
+        return False
+          
+    if any(char.isdigit() for char in pw):
+        level += 1
+          
+    if any(char.isupper() for char in pw):
+        level += 1
+          
+    if any(char.islower() for char in pw):
+        level += 1
+          
+    if any(char in SpecialSym for char in pw):
+        level += 1
+
+    if level < 3:
+        val = False
+        print('Password should have at least 3 of things: numberal, uppercase, lowercase letter, special symbol(!, @, #, $, %, ^, &, *)!!!')
+    return val
+def initAccountFile(tenFile):
+    struct = {'ID':pandas.Series(''),
+          'pass':pandas.Series('')}
+    DF = pandas.DataFrame(struct)
+    with open(tenFile, 'w+') as file:
+        DF.to_json(file, orient='index')
 def openFile(Filename):
     with open(Filename) as json_file:
         data = pandas.read_json(json_file, orient='index')
@@ -124,17 +171,14 @@ class App(Tk.Tk):
         self.waitingLabel.pack()
 
         self.conent =Tk.Frame(self)
-        self.data = Tk.Listbox(self.conent, height = 20, width = 70)
+        self.data =st.ScrolledText(self.conent, height= 20, width= 50)     
         self.conent.pack_configure()
-        self.scroll = Tk.Scrollbar(self.conent)
-        self.scroll.pack(side = 'right', fill= 'both')
-        self.data.config(yscrollcommand = self.scroll.set)
-        self.scroll.config(command = self.data.yview)
         self.data.pack()
 
         closeButton = Tk.Button(self, text = 'Close', command=lambda: closeServer()).pack()
         
         def handleClientSignUp(connection, nClient, clientStatus):
+
             username = connection.recv(1024).decode(FORMAT)
            
             with open('Accounts.json') as accountData:
@@ -161,6 +205,7 @@ class App(Tk.Tk):
 
             tmp = "Client " + str(nClient) + " has signed up with username: " + username
             clientStatus.append(tmp)
+            
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             username = connection.recv(1024).decode(FORMAT)
@@ -217,7 +262,7 @@ class App(Tk.Tk):
                         updateClientStatus(clientStatus)
                         connection.close()
                         break
-
+                    elif message=='': raise Exception
                 except:
                     tmp = "Client " + str(nClient) + " might be forcibly disconnected!"
                     if usingAccount in onlineClient: onlineClient.remove(usingAccount)
@@ -227,9 +272,11 @@ class App(Tk.Tk):
                     break
 
         def updateClientStatus(clientStatus):
-            self.data.delete(0, len(clientStatus))
+            self.data.delete('1.0', Tk.END)
             for i in clientStatus:
-                self.data.insert(clientStatus.index(i), i)
+                self.data.insert(Tk.INSERT,i+'\n')
+    
+        
         
         def closeServer(): self.destroy()
 
