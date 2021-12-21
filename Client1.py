@@ -10,27 +10,26 @@ def search_currency(data, find):
     f=''
     for i in data:
         if data[i]["Ngo\u1ea1i t\u1ec7"]==find:  
-          f=f+data[i].map(str)
-          break
+          f=f+str(data[i].map(str))
+          f=f+'\n'
     return(f)
-
 def search_date(data, date):
     f=''
     for i in data:
         if data[i]["Ng\u00e0y"]==date:
-            f=f+data[i].map(str) 
+            f=f+str(data[i].map(str)) #print(data[i])
+            f=f+ '\n'
     return(f)
-def search(data, currency=None, date=None):  
+def search(data, currency=None, date=None):
     f=''
-    if date==None:
+    if date=='':
       return ( search_currency(data,currency))
-    if currency==None:
+    if currency=='':
         return(search_date(data,date))
     else:    
         for i in data:
             if (data[i]["Ngo\u1ea1i t\u1ec7"]==currency) and (data[i]["Ng\u00e0y"]==date):
-               f=f+data[i].map(str)  
-              
+               f=f+data[i].map(str) # print(data[i])
     return(f)
 
 class ConnectPage(Tk.Frame):
@@ -104,9 +103,9 @@ class HomePage(Tk.Frame):
         Tk.Frame.__init__(self, parent)
 
         titleLabel = Tk.Label(self, text = 'HOME PAGE').pack()
-        provinceLabel = Tk.Label(self, text = 'Province').pack()
-        self.provinceEntry = Tk.Entry(self)
-        self.provinceEntry.pack()
+        currencyLabel = Tk.Label(self, text = 'Currency').pack()
+        self.currencyEntry = Tk.Entry(self)
+        self.currencyEntry.pack()
         dateLabel = Tk.Label(self, text = 'Date').pack()
         self.dateEntry = Tk.Entry(self)
         self.dateEntry.pack()
@@ -238,11 +237,11 @@ class App(Tk.Tk):
         try:
             client.sendall('Look up'.encode(FORMAT))
             date = currentPage.dateEntry.get()
-            province = currentPage.provinceEntry.get()
+            currency = currentPage.currencyEntry.get()
             response = client.recv(2048).decode(FORMAT)
             response = pandas.read_json(response, orient='index')
             print(response)
-            currentPage.infoLabel['text'] = search(response,province,date)
+            currentPage.infoLabel['text'] = search(response,currency,date)
         except:
             self.Error()
 

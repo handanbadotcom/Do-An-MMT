@@ -58,17 +58,17 @@ def pw_check(pw):
         print('Password should have at least 3 of things: numberal, uppercase, lowercase letter, special symbol(!, @, #, $, %, ^, &, *)!!!')
     return val
   
-#initAccountFile('test.json')
+initAccountFile('account.json')
 
-with open('test.json') as json_file:
+with open('account.json') as json_file:
         DF = pd.read_json(json_file, orient='index')
         print(DF)
-ID = 'huy'
-pw = '2412'
+ID = 'synguyencd3'
+pw = '123456'
 if pw_check(pw):
     print('pass is valid!!!')
-if checkAccount('test.json', ID) == True:
+if checkAccount('account.json', ID) == True:
     print('tai khoan da ton tai!!!')
 else:
-    addAccount('test.json', ID, pw)
+    addAccount('account.json', ID, pw)
     print('da tao tai khoan!!!')

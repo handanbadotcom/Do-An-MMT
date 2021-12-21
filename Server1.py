@@ -40,7 +40,7 @@ def updateFile(fileName, NumOfDay, Ban, Mua):
     with open(fileName) as json_file:
         data = pandas.read_json(json_file, orient='index')
     now = datetime.datetime.now()
-    today=now.strftime("%m/%d/%Y")
+    today=now.strftime("%d/%m/%Y")
     if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
         #push up data for new day
         for i in range(0, 7 * (NumOfDay - 1)):

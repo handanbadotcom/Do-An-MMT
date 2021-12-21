@@ -8,15 +8,16 @@ def search_currency(data, find):
     f=''
     for i in data:
         if data[i]["Ngo\u1ea1i t\u1ec7"]==find:  
-          f=f+data[i].map(str)
-          break
+          f=f+str(data[i].map(str))
+          f=f+'\n'
     return(f)
 
 def search_date(data, date):
     f=''
     for i in data:
         if data[i]["Ng\u00e0y"]==date:
-            f=f+data[i].map(str) #print(data[i])
+            f=f+str(data[i].map(str)) #print(data[i])
+            f=f+ '\n'
     return(f)
 def search(data, currency=None, date=None):
     f=''
@@ -32,7 +33,7 @@ def search(data, currency=None, date=None):
 
 #search_currency(data,'USD')
 #search_date(data,12,19,2021)
-print(search(data,currency='EUR',date='12/19/2021'))
+print(search(data,date='12/21/2021'))
 
 
 
