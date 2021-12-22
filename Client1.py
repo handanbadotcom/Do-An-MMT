@@ -179,24 +179,19 @@ class App(Tk.Tk):
                 return
 
             client.sendall('Sign up'.encode(FORMAT))
-
             client.sendall(username.encode(FORMAT))
-
             response = client.recv(1024).decode(FORMAT)
+            
             if response == 'False':
                 currentPage.notifyLabel['text'] = "This username already exists, please try again!"
                 print("Failed to Sign up")
                 return
-
-            client.sendall(password.encode(FORMAT))
-
-            print("Successfully Signed up")
-
-            self.showPage(SignInPage)
-
-            self.frames[SignInPage].notifyLabel['text'] = "Successfully Signed up! Use your account to login"
-
-            self.frames[SignUpPage].notifyLabel['text'] = ""
+            else:
+                client.sendall(password.encode(FORMAT))
+                print("Successfully Signed up")
+                self.showPage(SignInPage)
+                self.frames[SignInPage].notifyLabel['text'] = "Successfully Signed up! Use your account to login"
+                self.frames[SignUpPage].notifyLabel['text'] = ""
 
         except:
             self.Error()
