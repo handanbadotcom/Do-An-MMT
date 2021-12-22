@@ -2,11 +2,13 @@ import pandas as pd
 import json
 #khoi tao file cho lan dau chay code
 def initAccountFile(tenFile):
-    struct = {'ID':pd.Series(''),
-          'pass':pd.Series('')}
-    DF = pd.DataFrame(struct)
-    with open(tenFile, 'w+') as file:
-        DF.to_json(file, orient='index')
+    exists = os.path.exists(tenFile)
+    if exists == False:
+        struct = {'ID':pd.Series(''),
+              'pass':pd.Series('')}
+        DF = pd.DataFrame(struct)
+        with open(tenFile, 'w+') as file:
+            DF.to_json(file, orient='index')
 #Kiem tra da co tai khoan chua, neu co roi la True
 def checkID(fileName, ID):
     with open(fileName) as json_file:
