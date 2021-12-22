@@ -8,12 +8,20 @@ def initAccountFile(tenFile):
     with open(tenFile, 'w+') as file:
         DF.to_json(file, orient='index')
 #Kiem tra da co tai khoan chua, neu co roi la True
-def checkAccount(fileName, ID):
+def checkID(fileName, ID):
     with open(fileName) as json_file:
         DF = pd.read_json(json_file, orient='index')
     n = int(DF.size /2)
     for i in range(0,n):
         if DF.iat[i,0] == ID:
+            return True
+    return False
+def checkAccount(fileName, ID, pw):
+    with open(fileName) as json_file:
+        DF = pd.read_json(json_file, orient='index')
+    n = int(DF.size /2)
+    for i in range(0,n):
+        if DF.iat[i,0] == ID and DF.iat[i, 1] == pw:
             return True
     return False
 #them tai khoan vao file
