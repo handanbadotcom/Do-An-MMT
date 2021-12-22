@@ -2,35 +2,42 @@ import tkinter as Tk
 from tkinter import messagebox
 import socket
 import pandas
+import tkinter.scrolledtext as st
 HOST = ""
-PORT = 65432
+PORT = 60090
 FORMAT = "utf8"
 
 def search_currency(data, find):
     f=''
     for i in data:
         if data[i]["Ngo\u1ea1i t\u1ec7"]==find:  
-          f=f+data[i].map(str)
-          break
+          f=f+str(data[i].map(str))
+          f=f+'\n'
+          tmp = 'Name: ' + str(i) + ', dtype: object'
+          f = f.replace(tmp,'')
     return(f)
-
 def search_date(data, date):
     f=''
     for i in data:
         if data[i]["Ng\u00e0y"]==date:
-            f=f+data[i].map(str) 
+            f=f+str(data[i].map(str)) #print(data[i])
+            f=f+ '\n'
+            tmp = 'Name: ' + str(i) + ', dtype: object'
+            f = f.replace(tmp,'')
     return(f)
-def search(data, currency=None, date=None):  
+def search(data, currency=None, date=None):
     f=''
-    if date==None:
-      return ( search_currency(data,currency))
-    if currency==None:
+    if date=='':
+      return( search_currency(data,currency))
+    if currency=='':
         return(search_date(data,date))
     else:    
         for i in data:
             if (data[i]["Ngo\u1ea1i t\u1ec7"]==currency) and (data[i]["Ng\u00e0y"]==date):
-               f=f+data[i].map(str)  
-              
+                f=f+str(data[i].map(str)) #print(data[i])
+                f=f+ '\n'
+                tmp = 'Name: ' + str(i) + ', dtype: object'
+                f = f.replace(tmp,'')
     return(f)
 
 class ConnectPage(Tk.Frame):
@@ -104,14 +111,16 @@ class HomePage(Tk.Frame):
         Tk.Frame.__init__(self, parent)
 
         titleLabel = Tk.Label(self, text = 'HOME PAGE').pack()
-        provinceLabel = Tk.Label(self, text = 'Province').pack()
-        self.provinceEntry = Tk.Entry(self)
-        self.provinceEntry.pack()
+        currencyLabel = Tk.Label(self, text = 'Currency').pack()
+        self.currencyEntry = Tk.Entry(self)
+        self.currencyEntry.pack()
         dateLabel = Tk.Label(self, text = 'Date').pack()
         self.dateEntry = Tk.Entry(self)
         self.dateEntry.pack()
         self.infoLabel = Tk.Label(self, text = '')
         self.infoLabel.pack()
+        self.text_area = st.ScrolledText(self,width = 30, height = 7)
+        self.text_area.pack()
         lookUpButton = Tk.Button(self, text = 'Look up', command=lambda: appControl.lookUp(self, client)).pack()
         logoutButton = Tk.Button(self, text = 'Logout', command=lambda: appControl.Logout()).pack()
 
@@ -238,11 +247,13 @@ class App(Tk.Tk):
         try:
             client.sendall('Look up'.encode(FORMAT))
             date = currentPage.dateEntry.get()
-            province = currentPage.provinceEntry.get()
+            currency = currentPage.currencyEntry.get()
             response = client.recv(2048).decode(FORMAT)
             response = pandas.read_json(response, orient='index')
-            print(response)
-            currentPage.infoLabel['text'] = search(response,province,date)
+            currentPage.text_area.configure(state='normal')
+            currentPage.text_area.delete('1.0', Tk.END)
+            currentPage.text_area.insert(Tk.INSERT,search(response,currency,date))
+            currentPage.text_area.configure(state='disabled')
         except:
             self.Error()
 

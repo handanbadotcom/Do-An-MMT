@@ -8,17 +8,70 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from datetime import *
 import datetime
-
+import time
+import tkinter.scrolledtext as st
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
-PORT = 65432
+PORT = 60090
 FORMAT = "utf8"
-NUM_OF_DAY = 3 #so ngay toi da cua file json
-#link web
-url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
+NUM_OF_DAY = 3 
 
-def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so ngay cho truoc
+Limit = 1      #phut
+url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
+fileName='Currency.json'
+account_fileName='account.json'
+
+def addAccount(fileName, ID, pw):
+    with open(fileName) as json_file:
+        DF = pandas.read_json(json_file, orient='index')
+    n = int(DF.size /2)
+    struct = {'ID':pandas.Series(ID,index = [n]),
+          'pass':pandas.Series(pw,index= [n])}
+    newDF = pandas.DataFrame(struct)
+    DF = pandas.concat([DF, newDF], axis=0, join='inner')
+    with open(fileName, 'w+') as file:
+        DF.to_json(file, orient='index')
+def pw_check(pw):
+      
+    SpecialSym =['!', '@', '#', '$', '%', '^', '&', '*']
+    val = True
+    level = 0  
+    if len(pw) < 6:
+        print('length should be at least 6')
+        return False
+          
+    if len(pw) > 20:
+        print('length should be not be greater than 20')
+        return False
+          
+    if any(char.isdigit() for char in pw):
+        level += 1
+          
+    if any(char.isupper() for char in pw):
+        level += 1
+          
+    if any(char.islower() for char in pw):
+        level += 1
+          
+    if any(char in SpecialSym for char in pw):
+        level += 1
+
+    if level < 3:
+        val = False
+        print('Password should have at least 3 of things: numberal, uppercase, lowercase letter, special symbol(!, @, #, $, %, ^, &, *)!!!')
+    return val
+def initAccountFile(tenFile):
+    struct = {'ID':pandas.Series(''),
+          'pass':pandas.Series('')}
+    DF = pandas.DataFrame(struct)
+    with open(tenFile, 'w+') as file:
+        DF.to_json(file, orient='index')
+def openFile(Filename):
+    with open(Filename) as json_file:
+        data = pandas.read_json(json_file, orient='index')
+    return data    
+def initJsonFile(tenFile, NumOfDay): 
     sotmp = []
     chutmp = []
     STT = [1,2,3,4,5,6,7]
@@ -37,24 +90,28 @@ def initJsonFile(tenFile, NumOfDay):  #Khoi tao file JSON du lieu trong voi so n
     with open(tenFile, 'w+') as file:
         DF.to_json(file, orient='index')
 def updateFile(fileName, NumOfDay, Ban, Mua):
-    with open(fileName) as json_file:
-        data = pandas.read_json(json_file, orient='index')
-    now = datetime.datetime.now()
-    today=now.strftime("%m/%d/%Y")
-    if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
-        #push up data for new day
-        for i in range(0, 7 * (NumOfDay - 1)):
-            for j in range(0, 6):
-                data.iat[i, j] = data.iat[i + 7, j]
-        #replace data of column day
+    try:
+        with open(fileName) as json_file:
+            data = pandas.read_json(json_file, orient='index')
+        now = datetime.datetime.now()
+        today=now.strftime("%d/%m/%Y")
+        if(data.iat[7 * NumOfDay - 1, 0] != today):    #data of new day
+            #push up data for new day
+            for i in range(0, 7 * (NumOfDay - 1)):
+                for j in range(0, 6):
+                    data.iat[i, j] = data.iat[i + 7, j]
+            #replace data of column day
+            for i in range(-7, 0):
+                data.iat[i, 0] = today
         for i in range(-7, 0):
-            data.iat[i, 0] = today
-    for i in range(-7, 0):
-        data.iat[i,4] = Mua[i]
-        data.iat[i,5] = Ban[i]
-    #print(data)
-    with open(fileName, 'w+') as file:
-        data.to_json(file, orient='index')
+            data.iat[i,4] = Mua[i]
+            data.iat[i,5] = Ban[i]
+        #print(data)
+        with open(fileName, 'w+') as file:
+            data.to_json(file, orient='index')
+    except:
+        initJsonFile(fileName,NumOfDay)
+        updateData(url,fileName,NumOfDay)
 def updateData(url, fileName, NumOfDay):
     #tao ket noi va tao soup
     r = requests.get(url).content
@@ -114,17 +171,14 @@ class App(Tk.Tk):
         self.waitingLabel.pack()
 
         self.conent =Tk.Frame(self)
-        self.data = Tk.Listbox(self.conent, height = 20, width = 70)
+        self.data =st.ScrolledText(self.conent, height= 20, width= 50)     
         self.conent.pack_configure()
-        self.scroll = Tk.Scrollbar(self.conent)
-        self.scroll.pack(side = 'right', fill= 'both')
-        self.data.config(yscrollcommand = self.scroll.set)
-        self.scroll.config(command = self.data.yview)
         self.data.pack()
 
         closeButton = Tk.Button(self, text = 'Close', command=lambda: closeServer()).pack()
         
         def handleClientSignUp(connection, nClient, clientStatus):
+
             username = connection.recv(1024).decode(FORMAT)
            
             with open('Accounts.json') as accountData:
@@ -151,6 +205,7 @@ class App(Tk.Tk):
 
             tmp = "Client " + str(nClient) + " has signed up with username: " + username
             clientStatus.append(tmp)
+            
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             username = connection.recv(1024).decode(FORMAT)
@@ -201,25 +256,27 @@ class App(Tk.Tk):
                         connection.sendall(data_send.encode(FORMAT))
 
                     elif message == "Exit":
-                        tmp = "Client " + str(nClient) + " has disconnected."
-                        onlineClient.remove(usingAccount)
+                        tmp = "Client " + str(nClient) + " has disconnected."                           
+                        if usingAccount in onlineClient: onlineClient.remove(usingAccount)
                         clientStatus.append(tmp)
                         updateClientStatus(clientStatus)
                         connection.close()
                         break
-
+                    elif message=='': raise Exception
                 except:
                     tmp = "Client " + str(nClient) + " might be forcibly disconnected!"
-                    onlineClient.remove(usingAccount)
+                    if usingAccount in onlineClient: onlineClient.remove(usingAccount)
                     clientStatus.append(tmp)
                     updateClientStatus(clientStatus)
                     connection.close()
                     break
 
         def updateClientStatus(clientStatus):
-            self.data.delete(0, len(clientStatus))
+            self.data.delete('1.0', Tk.END)
             for i in clientStatus:
-                self.data.insert(clientStatus.index(i), i)
+                self.data.insert(Tk.INSERT,i+'\n')
+    
+        
         
         def closeServer(): self.destroy()
 
@@ -240,14 +297,22 @@ class App(Tk.Tk):
         serverThread.daemon = False
         serverThread.start()
 
-#initJsonFile('test.json',NUM_OF_DAY)
-updateData(url, 'test.json', NUM_OF_DAY)
-with open('test.json') as json_file:
-        data = pandas.read_json(json_file, orient='index')
-data_send=data.to_json()
+
+updateData(url, fileName, NUM_OF_DAY)
+data_send=openFile(fileName).to_json()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
+
+def timeCounter():
+    global data_send
+    while True:
+        time.sleep(60 * Limit)
+        updateData(url, fileName, NUM_OF_DAY)
+        data_send=openFile(fileName).to_json()
+        
+t = threading.Thread(target = timeCounter)
+t.start()
 
 try:
     app = App()
