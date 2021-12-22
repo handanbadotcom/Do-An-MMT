@@ -6,7 +6,34 @@ import tkinter.scrolledtext as st
 HOST = ""
 PORT = 60090
 FORMAT = "utf8"
+def pw_check(pw):
+      
+    SpecialSym =['!', '@', '#', '$', '%', '^', '&', '*']
+    level = 0  
+    value='True'
+    if len(pw) < 6:
+        value='length should be at least 6'
+        return value
+          
+    if len(pw) > 20:
+        value='length should be not be greater than 20'
+        return value
+          
+    if any(char.isdigit() for char in pw):
+        level += 1
+          
+    if any(char.isupper() for char in pw):
+        level += 1
+          
+    if any(char.islower() for char in pw):
+        level += 1
+          
+    if any(char in SpecialSym for char in pw):
+        level += 1
 
+    if level < 3:
+        value='Password should have at least 3 of things:\n numberal \n uppercase \n lowercase letter \n special symbol(!, @, #, $, %, ^, &, *)!!!'
+    return value
 def search_currency(data, find):
     f=''
     for i in data:
@@ -176,6 +203,11 @@ class App(Tk.Tk):
             if confirmPassword != password:
                 currentPage.notifyLabel['text'] = "Your password and confirm password don't match!"
                 print("Failed to Sign up")
+                return
+
+            tmp=pw_check(password)
+            if tmp!='True':
+                currentPage.notifyLabel['text']=tmp
                 return
 
             client.sendall('Sign up'.encode(FORMAT))

@@ -20,9 +20,17 @@ NUM_OF_DAY = 3
 Limit = 1      #phut
 url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 fileName='Currency.json'
-account_fileName='account(9).json'
+account_fileName='account.json'
 
-def checkAccount(fileName, ID):
+def checkAccount(fileName, ID, pw):
+    with open(fileName) as json_file:
+        DF = pandas.read_json(json_file, orient='index')
+    n = int(DF.size /2)
+    for i in range(0,n):
+        if DF.iat[i,0] == ID and DF.iat[i, 1] == pw:
+            return True
+    return False
+def checkID(fileName, ID):
     with open(fileName) as json_file:
         DF = pandas.read_json(json_file, orient='index')
     n = int(DF.size /2)
@@ -40,35 +48,6 @@ def addAccount(fileName, ID, pw):
     DF = pandas.concat([DF, newDF], axis=0, join='inner')
     with open(fileName, 'w+') as file:
         DF.to_json(file, orient='index')
-def pw_check(pw):
-      
-    SpecialSym =['!', '@', '#', '$', '%', '^', '&', '*']
-    val = True
-    level = 0  
-    if len(pw) < 6:
-        print('length should be at least 6')
-        return False
-          
-    if len(pw) > 20:
-        print('length should be not be greater than 20')
-        return False
-          
-    if any(char.isdigit() for char in pw):
-        level += 1
-          
-    if any(char.isupper() for char in pw):
-        level += 1
-          
-    if any(char.islower() for char in pw):
-        level += 1
-          
-    if any(char in SpecialSym for char in pw):
-        level += 1
-
-    if level < 3:
-        val = False
-        print('Password should have at least 3 of things: numberal, uppercase, lowercase letter, special symbol(!, @, #, $, %, ^, &, *)!!!')
-    return val
 def initAccountFile(tenFile):
     try:
         with open(tenFile) as json_file:
@@ -193,7 +172,7 @@ class App(Tk.Tk):
         def handleClientSignUp(connection, nClient, clientStatus):
 
             ID = connection.recv(1024).decode(FORMAT)
-            tmp = checkAccount(account_fileName,ID)
+            tmp = checkID(account_fileName,ID)
             if tmp:
                 connection.sendall(str(tmp).encode(FORMAT))
                 pw=connection.recv(1024).decode(FORMAT)
@@ -234,6 +213,26 @@ class App(Tk.Tk):
             '''
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
+            ID = connection.recv(1024).decode(FORMAT)
+            connection.sendall(ID.encode(FORMAT))
+            pw = connection.recv(1024).decode(FORMAT)
+            
+            check = checkAccount(account_fileName,ID,pw)
+            if ID in onlineClient:
+                connection.sendall('Exist'.encode(FORMAT))
+            else:
+                connection.sendall(str(check).encode(FORMAT))
+
+            if check:
+                onlineClient.append(ID)
+                tmp = "Client " + str(nClient) + " has logged in as: " + ID
+                clientStatus.append(tmp)
+            return ID
+            #clientAccount = {"username": ID, "password": pw}
+            
+           
+
+            '''
             username = connection.recv(1024).decode(FORMAT)
             connection.sendall(username.encode(FORMAT))
             password = connection.recv(1024).decode(FORMAT)
@@ -258,6 +257,7 @@ class App(Tk.Tk):
             tmp = "Client " + str(nClient) + " has logged in as: " + username
             clientStatus.append(tmp)
             return username
+            '''
 
         def handleClient(self, connection, address, nClient, onlineClient, clientStatus):
             self.waitingLabel['text'] = ''
