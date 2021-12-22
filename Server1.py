@@ -20,8 +20,16 @@ NUM_OF_DAY = 3
 Limit = 1      #phut
 url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 fileName='Currency.json'
-account_fileName='account.json'
+account_fileName='account(9).json'
 
+def checkAccount(fileName, ID):
+    with open(fileName) as json_file:
+        DF = pandas.read_json(json_file, orient='index')
+    n = int(DF.size /2)
+    for i in range(0,n):
+        if DF.iat[i,0] == ID:
+            return False
+    return True
 def addAccount(fileName, ID, pw):
     with open(fileName) as json_file:
         DF = pandas.read_json(json_file, orient='index')
@@ -62,11 +70,16 @@ def pw_check(pw):
         print('Password should have at least 3 of things: numberal, uppercase, lowercase letter, special symbol(!, @, #, $, %, ^, &, *)!!!')
     return val
 def initAccountFile(tenFile):
-    struct = {'ID':pandas.Series(''),
-          'pass':pandas.Series('')}
-    DF = pandas.DataFrame(struct)
-    with open(tenFile, 'w+') as file:
-        DF.to_json(file, orient='index')
+    try:
+        with open(tenFile) as json_file:
+            TMP = pandas.read_json(json_file, orient='index')
+        return
+    except:
+        struct = {'ID':pandas.Series(''),
+            'pass':pandas.Series('')}
+        DF = pandas.DataFrame(struct)
+        with open(tenFile, 'w+') as file:
+            DF.to_json(file, orient='index')
 def openFile(Filename):
     with open(Filename) as json_file:
         data = pandas.read_json(json_file, orient='index')
@@ -179,6 +192,19 @@ class App(Tk.Tk):
         
         def handleClientSignUp(connection, nClient, clientStatus):
 
+            ID = connection.recv(1024).decode(FORMAT)
+            tmp = checkAccount(account_fileName,ID)
+            if tmp:
+                connection.sendall(str(tmp).encode(FORMAT))
+                pw=connection.recv(1024).decode(FORMAT)
+                addAccount(account_fileName,ID,pw)
+            else:
+                connection.sendall(str(tmp).encode(FORMAT))
+
+            tmp = "Client " + str(nClient) + " has signed up with username: " + ID
+            clientStatus.append(tmp)
+
+            '''
             username = connection.recv(1024).decode(FORMAT)
            
             with open('Accounts.json') as accountData:
@@ -205,7 +231,7 @@ class App(Tk.Tk):
 
             tmp = "Client " + str(nClient) + " has signed up with username: " + username
             clientStatus.append(tmp)
-            
+            '''
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             username = connection.recv(1024).decode(FORMAT)
@@ -297,7 +323,7 @@ class App(Tk.Tk):
         serverThread.daemon = False
         serverThread.start()
 
-
+initAccountFile(account_fileName)
 updateData(url, fileName, NUM_OF_DAY)
 data_send=openFile(fileName).to_json()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
