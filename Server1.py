@@ -183,34 +183,6 @@ class App(Tk.Tk):
             tmp = "Client " + str(nClient) + " has signed up with username: " + ID
             clientStatus.append(tmp)
 
-            '''
-            username = connection.recv(1024).decode(FORMAT)
-           
-            with open('Accounts.json') as accountData:
-                accountList = json.load(accountData)
-            accountData.close()
-
-            usernameList = []
-            for account in accountList['accounts']:
-                usernameList.append(account['username'])
-
-            if username in usernameList:
-                connection.sendall('False'.encode(FORMAT))
-                return
-                
-            connection.sendall('True'.encode(FORMAT))
-            password = connection.recv(1024).decode(FORMAT)
-
-            newAccount = {"username": username, "password": password}
-            accountList['accounts'].append(newAccount)
-
-            with open('Accounts.json', 'w') as accountData:
-                json.dump(accountList, accountData, indent = 2)
-            accountData.close()
-
-            tmp = "Client " + str(nClient) + " has signed up with username: " + username
-            clientStatus.append(tmp)
-            '''
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             ID = connection.recv(1024).decode(FORMAT)
@@ -229,35 +201,6 @@ class App(Tk.Tk):
                 clientStatus.append(tmp)
             return ID
             #clientAccount = {"username": ID, "password": pw}
-            
-           
-
-            '''
-            username = connection.recv(1024).decode(FORMAT)
-            connection.sendall(username.encode(FORMAT))
-            password = connection.recv(1024).decode(FORMAT)
-            
-            with open('Accounts.json') as accountData:
-                accountList = json.load(accountData)
-            accountData.close()
-
-            if username in onlineClient:
-                connection.sendall('Exist'.encode(FORMAT))
-                return None
-
-            clientAccount = {"username": username, "password": password}
-
-            if clientAccount not in accountList['accounts']:
-                connection.sendall('False'.encode(FORMAT))
-                return None
-            
-            connection.sendall('True'.encode(FORMAT))
-
-            onlineClient.append(username)
-            tmp = "Client " + str(nClient) + " has logged in as: " + username
-            clientStatus.append(tmp)
-            return username
-            '''
 
         def handleClient(self, connection, address, nClient, onlineClient, clientStatus):
             self.waitingLabel['text'] = ''
