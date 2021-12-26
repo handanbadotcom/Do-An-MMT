@@ -3,6 +3,7 @@ from tkinter import messagebox
 import socket
 import pandas
 import tkinter.scrolledtext as st
+
 HOST = ""
 PORT = 60090
 FORMAT = "utf8"
@@ -121,6 +122,7 @@ class SignUpPage(Tk.Frame):
         self.notifyLabel = Tk.Label(self, text = '')
         signUpButton = Tk.Button(self, text = 'Sign up', command=lambda: appControl.signUp(self, client))
         backButton = Tk.Button(self, text = 'Back', command=lambda: appControl.showPage(SignInPage))
+        self.text_area =st.ScrolledText(self, height= 4, width= 40)    
 
         titleLabel.pack()
         usernameLabel.pack()
@@ -130,6 +132,7 @@ class SignUpPage(Tk.Frame):
         confirmPasswordLabel.pack()
         self.confirmPasswordEntry.pack()
         self.notifyLabel.pack()
+        self.text_area.pack()
         signUpButton.pack()
         backButton.pack()
 
@@ -195,19 +198,31 @@ class App(Tk.Tk):
             confirmPassword = currentPage.confirmPasswordEntry.get()
 
             if username == "" or password == "" or confirmPassword == "":
-                currentPage.notifyLabel['text'] = "You must fill all the empty fields!"
+                #currentPage.notifyLabel['text'] = "You must fill all the empty fields!"
+                currentPage.text_area.configure(state='normal')
+                currentPage.text_area.delete('1.0', Tk.END)
+                currentPage.text_area.insert(Tk.INSERT,"You must fill all the empty fields!")
+                currentPage.text_area.configure(state='disabled')
                 return
 
             print("You tried to sign up with username:", username, "- password:", password, "- confirm password:", confirmPassword)
 
             if confirmPassword != password:
-                currentPage.notifyLabel['text'] = "Your password and confirm password don't match!"
+                #currentPage.notifyLabel['text'] = "Your password and confirm password don't match!"
+                currentPage.text_area.configure(state='normal')
+                currentPage.text_area.delete('1.0', Tk.END)
+                currentPage.text_area.insert(Tk.INSERT,"Your password and confirm password don't match!")
+                currentPage.text_area.configure(state='disabled')
                 print("Failed to Sign up")
                 return
 
             tmp=pw_check(password)
             if tmp!='True':
-                currentPage.notifyLabel['text']=tmp
+                #currentPage.notifyLabel['text']=tmp
+                currentPage.text_area.configure(state='normal')
+                currentPage.text_area.delete('1.0', Tk.END)
+                currentPage.text_area.insert(Tk.INSERT,tmp)
+                currentPage.text_area.configure(state='disabled')
                 return
 
             client.sendall('Sign up'.encode(FORMAT))
@@ -215,15 +230,23 @@ class App(Tk.Tk):
             response = client.recv(1024).decode(FORMAT)
             
             if response == 'False':
-                currentPage.notifyLabel['text'] = "This username already exists, please try again!"
+                #currentPage.notifyLabel['text'] = "This username already exists, please try again!"
+                currentPage.text_area.configure(state='normal')
+                currentPage.text_area.delete('1.0', Tk.END)
+                currentPage.text_area.insert(Tk.INSERT,"This username already exists, please try again!")
+                currentPage.text_area.configure(state='disabled')
                 print("Failed to Sign up")
                 return
             else:
                 client.sendall(password.encode(FORMAT))
                 print("Successfully Signed up")
                 self.showPage(SignInPage)
-                self.frames[SignInPage].notifyLabel['text'] = "Successfully Signed up! Use your account to login"
-                self.frames[SignUpPage].notifyLabel['text'] = ""
+                #self.frames[SignInPage].notifyLabel['text'] = "Successfully Signed up! Use your account to login"
+                #self.frames[SignUpPage].notifyLabel['text'] = ""
+                currentPage.text_area.configure(state='normal')
+                currentPage.text_area.delete('1.0', Tk.END)
+                currentPage.text_area.insert(Tk.INSERT,"Successfully Signed up! Use your account to login")
+                currentPage.text_area.configure(state='disabled')
 
         except:
             self.Error()
