@@ -111,7 +111,7 @@ class SignInPage(Tk.Frame):
         self.canvas.create_text(250.0, 151.5,text = "Password",fill = "#5b34a9", font = ("Questrial-Regular", int(12.0))) #Pass
         self.entry2_img = Tk.PhotoImage(file = f"SIGN IN\img_textBox2_signin.png") #TextBox_Pass
         self.canvas.create_image( 249.5, 172.5,  image = self.entry2_img)
-        self.entry2 = Tk.Entry(self, bd = 0, bg = "#ffffff", highlightthickness = 0)
+        self.entry2 = Tk.Entry(self, bd = 0, bg = "#ffffff", highlightthickness = 0, show = '*')
         self.entry2.place( x = 162, y = 164, width = 175, height = 15)
 
         self.img0 = Tk.PhotoImage(file = f"SIGN IN\img0_signin.png")
@@ -149,13 +149,13 @@ class SignUpPage(Tk.Frame):
         self.canvas.create_text(250.0, 115.5, text = "Password",fill = "#5b34a9",font = ("Questrial-Regular", int(12.0))) #TextBox_Pass
         self.entry2_img = Tk.PhotoImage(file = f"SIGN UP\img_textBox2_signup.png")
         self.canvas.create_image(249.5, 135.5, image = self.entry2_img)
-        self.entry2 = Tk.Entry(self, bd = 0, bg = "#ffffff",highlightthickness = 0)
+        self.entry2 = Tk.Entry(self, bd = 0, bg = "#ffffff",highlightthickness = 0,show = '*')
         self.entry2.place(x = 162, y = 127, width = 175,height = 15)
 
         self.canvas.create_text(250.0, 162.5,text = "Confirm Password",fill = "#5b34a9",font = ("Questrial-Regular", int(12.0))) #TextBox_ConfirmPass
         self.entry3_img = Tk.PhotoImage(file = f"SIGN UP\img_textBox3_signup.png")
         self.canvas.create_image(249.5, 182.5,image = self.entry3_img)
-        self.entry3 = Tk.Entry(self, bd = 0,bg = "#ffffff", highlightthickness = 0)
+        self.entry3 = Tk.Entry(self, bd = 0,bg = "#ffffff", highlightthickness = 0,show = '*')
         self.entry3.place( x = 162, y = 174, width = 175, height = 15)
 
         self.img0 = Tk.PhotoImage(file = f"SIGN UP\img0_signup.png") #Button_SignUp
