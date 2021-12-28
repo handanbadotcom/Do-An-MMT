@@ -17,7 +17,7 @@ PORT = 60090
 FORMAT = "utf8"
 NUM_OF_DAY = 3 
 
-Limit = 1      #phut
+Limit = 30      #phut
 url = 'https://sbv.gov.vn/TyGia/faces/TyGiaMobile.jspx?_afrLoop=14339020310096506&_afrWindowMode=0&_adf.ctrl-state=1786p90txj_21'
 fileName='Currency.json'
 account_fileName='account.json'
