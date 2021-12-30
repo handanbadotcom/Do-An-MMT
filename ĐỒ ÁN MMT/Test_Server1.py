@@ -256,14 +256,13 @@ class App(Tk.Tk):
             nClient = 1
             onlineClient = []
             clientStatus = []
-            #self.data.insert(0,"Waiting for client")
             while True:
                 connection, address = server.accept()
-
                 thread = threading.Thread(target = handleClient, args = (self, connection, address, nClient, onlineClient, clientStatus))
                 thread.daemon = False
                 thread.start()
                 nClient+=1
+
 
         serverThread = threading.Thread(target = runServer)
         serverThread.daemon = False

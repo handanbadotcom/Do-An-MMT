@@ -1,8 +1,9 @@
 import tkinter as Tk
-from tkinter import messagebox
+from tkinter import EXCEPTION, messagebox
 import socket
 import pandas
 import tkinter.scrolledtext as st
+import select
 HOST = ""
 PORT = 60090
 FORMAT = "utf8"
@@ -238,7 +239,6 @@ class App(Tk.Tk):
                 
         except:
             print("Failed to Connect!")
-            #currentPage.notify['text'] = "Invalid IP Address"
             currentPage.canvas.itemconfigure(currentPage.notify, text = "Invalid IP Address")
 
     def signUp(self, currentPage, client):
@@ -248,30 +248,29 @@ class App(Tk.Tk):
             confirmPassword = currentPage.entry3.get()
 
             if username == "" or password == "" or confirmPassword == "":
-                #currentPage.notify['text'] = "You must fill all the empty fields!"
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "You must fill all the empty fields!")
                 return
 
             print("You tried to sign up with username:", username, "- password:", password, "- confirm password:", confirmPassword)
 
             if confirmPassword != password:
-                #currentPage.notify['text'] = "Your password and confirm password don't match!"
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "Your password and confirm password don't match!")
                 print("Failed to Sign up")
                 return
 
             tmp=pw_check(password)
             if tmp!='True':
-                #currentPage.notify['text']=tmp
                 currentPage.canvas.itemconfigure(currentPage.notify, text = tmp)
                 return
 
             client.sendall('Sign up'.encode(FORMAT))
             client.sendall(username.encode(FORMAT))
-            response = client.recv(1024).decode(FORMAT)
+            ready = select.select([client], [], [], 5)
+            if ready[0]:
+                response = client.recv(1024).decode(FORMAT)
+            else: raise Exception
             
             if response == 'False':
-                #currentPage.notify['text'] = "This username already exists, please try again!"
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "This username already exists, please try again!")
                 print("Failed to Sign up")
                 return
@@ -279,8 +278,6 @@ class App(Tk.Tk):
                 client.sendall(password.encode(FORMAT))
                 print("Successfully Signed up")
                 self.showPage(SignInPage)
-                #self.frames[SignInPage].notify['text'] = "Successfully Signed up! Use your account to login"
-                #self.frames[SignUpPage].notify['text'] = ""
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "Successfully Signed up! Use your account to login")
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "")
    
@@ -296,30 +293,32 @@ class App(Tk.Tk):
             password = currentPage.entry2.get()
 
             if username == "" or password == "":
-                #currentPage.notify['text'] = "You must fill all the empty fields!"
                 currentPage.canvas.itemconfigure(currentPage.notify, text = "You must fill all the empty fields!")
                 return
 
             print("You tried to login with username:", username, "- password:", password)
 
             client.sendall(username.encode(FORMAT))
-            client.recv(1024).decode(FORMAT)
+            ready = select.select([client], [], [], 5)
+            if ready[0]:
+                client.recv(1024).decode(FORMAT)
+            else: raise Exception
+            
             client.sendall(password.encode(FORMAT))
-
-            response = client.recv(1024).decode(FORMAT)
+            ready = select.select([client], [], [], 5)
+            if ready[0]:
+                response = client.recv(1024).decode(FORMAT)
+            else: raise Exception
             if response == 'True':
                self.showPage(HomePage)
-               #self.frames[SignInPage].notify['text'] = ''   
                currentPage.canvas.itemconfigure(currentPage.notify, text = '')            
                return
 
             if response == 'Exist':
-               #currentPage.notify['text'] = "This account is already logged in by another client!"
                currentPage.canvas.itemconfigure(currentPage.notify, text = "This account is already logged in by another client!")
                print("Failed to Login")
                return
             else: 
-               #currentPage.notify['text'] = "Your username or password is incorrect, please try again!"
                currentPage.canvas.itemconfigure(currentPage.notify, text = "Your username or password is incorrect, please try again!")
                print("Failed to Login")
                return
@@ -339,7 +338,10 @@ class App(Tk.Tk):
             client.sendall('Look up'.encode(FORMAT))
             date = currentPage.entry1.get()
             currency = currentPage.entry0.get()
-            response = client.recv(2048).decode(FORMAT)
+            ready = select.select([client], [], [], 5)
+            if ready[0]:
+                response = client.recv(2048).decode(FORMAT)
+            else: raise Exception
             response = pandas.read_json(response, orient='index')
             data=search(response,currency,date)
             currentPage.text_area.configure(state='normal')
