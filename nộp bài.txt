@@ -1,0 +1,2 @@
+nop source se nop 2 thu muc la FINAL_CLIENT_SOURCE va FINAL_SERVER_SOURCE
+do 2 thu muc duoi _EXE qua lon de nop nen phai up len CLOUD roi dua link
