@@ -265,7 +265,7 @@ class App(Tk.Tk):
 
             client.sendall('Sign up'.encode(FORMAT))
             client.sendall(username.encode(FORMAT))
-            ready = select.select([client], [], [], 5)
+            ready = select.select([client], [], [], 15)
             if ready[0]:
                 response = client.recv(1024).decode(FORMAT)
             else: raise Exception
@@ -299,13 +299,13 @@ class App(Tk.Tk):
             print("You tried to login with username:", username, "- password:", password)
 
             client.sendall(username.encode(FORMAT))
-            ready = select.select([client], [], [], 5)
+            ready = select.select([client], [], [], 15)
             if ready[0]:
                 client.recv(1024).decode(FORMAT)
             else: raise Exception
             
             client.sendall(password.encode(FORMAT))
-            ready = select.select([client], [], [], 5)
+            ready = select.select([client], [], [], 15)
             if ready[0]:
                 response = client.recv(1024).decode(FORMAT)
             else: raise Exception
@@ -338,7 +338,7 @@ class App(Tk.Tk):
             client.sendall('Look up'.encode(FORMAT))
             date = currentPage.entry1.get()
             currency = currentPage.entry0.get()
-            ready = select.select([client], [], [], 5)
+            ready = select.select([client], [], [], 15)
             if ready[0]:
                 response = client.recv(2048).decode(FORMAT)
             else: raise Exception

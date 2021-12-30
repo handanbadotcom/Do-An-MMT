@@ -170,7 +170,7 @@ class App(Tk.Tk):
         self.data.place(x = 75, y =90)
 
         self.img0 = Tk.PhotoImage(file = f"SERVER\img0_server.png")
-        self.b0 = Tk.Button(self,image = self.img0,borderwidth = 0,highlightthickness = 0, command = self.destroy,relief = "flat")
+        self.b0 = Tk.Button(self,image = self.img0,borderwidth = 0,highlightthickness = 0, command = self.destroy ,relief = "flat")
         self.b0.place(x = 204, y = 424,width = 91,height = 31)
         
         def handleClientSignUp(connection, nClient, clientStatus):
@@ -187,6 +187,9 @@ class App(Tk.Tk):
             tmp = "Client " + str(nClient) + " has signed up with username: " + ID
             clientStatus.append(tmp)
 
+        def server_quit(self):
+            self.destroy()
+            return
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             ID = connection.recv(1024).decode(FORMAT)
@@ -259,13 +262,13 @@ class App(Tk.Tk):
             while True:
                 connection, address = server.accept()
                 thread = threading.Thread(target = handleClient, args = (self, connection, address, nClient, onlineClient, clientStatus))
-                thread.daemon = False
+                thread.daemon = True
                 thread.start()
                 nClient+=1
 
 
         serverThread = threading.Thread(target = runServer)
-        serverThread.daemon = False
+        serverThread.daemon = True
         serverThread.start()
 
 initAccountFile(account_fileName)
@@ -283,6 +286,7 @@ def timeCounter():
         data_send=openFile(fileName).to_json()
         
 t = threading.Thread(target = timeCounter)
+t.daemon=True
 t.start()
 
 try:
