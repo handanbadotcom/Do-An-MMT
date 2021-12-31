@@ -187,9 +187,6 @@ class App(Tk.Tk):
             tmp = "Client " + str(nClient) + " has signed up with username: " + ID
             clientStatus.append(tmp)
 
-        def server_quit(self):
-            self.destroy()
-            return
 
         def handleClientLogin(connection, nClient, onlineClient, clientStatus):
             ID = connection.recv(1024).decode(FORMAT)
