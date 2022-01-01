@@ -175,6 +175,7 @@ class App(Tk.Tk):
         
         def handleClientSignUp(connection, nClient, clientStatus):
 
+            connection.sendall('request ID'.encode(FORMAT))
             ID = connection.recv(1024).decode(FORMAT)
             tmp = checkID(account_fileName,ID)
             if tmp:

@@ -244,6 +244,7 @@ class App(Tk.Tk):
     def signUp(self, currentPage, client):
         try:
             username = currentPage.entry1.get()
+            
             password = currentPage.entry2.get()
             confirmPassword = currentPage.entry3.get()
 
@@ -264,6 +265,10 @@ class App(Tk.Tk):
                 return
 
             client.sendall('Sign up'.encode(FORMAT))
+            ready = select.select([client], [], [], 15)
+            if ready[0]:
+                client.recv(1024).decode(FORMAT)
+            else: raise Exception
             client.sendall(username.encode(FORMAT))
             ready = select.select([client], [], [], 15)
             if ready[0]:
